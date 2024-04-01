@@ -51,8 +51,8 @@ public class AlphaVantageDataRetrievalJob implements Runnable {
 			log.info("***************{}", urlString);
 			URL url = new URL(urlString);
 			byte[] bytes = new URL(urlString).openStream().readAllBytes();
-			//String jsonString = new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
-			String jsonString = DataMinerUtility.getJsonTestFile();//only for local testing
+			String jsonString = new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
+			//String jsonString = DataMinerUtility.getJsonTestFile();//only for local testing
 			JsonNode financialDataNode = getJsonNode(jsonString);
 			log.info("getHistoricalData  {}", jsonString);
 			getDailyData(financialDataNode);
@@ -84,9 +84,9 @@ public class AlphaVantageDataRetrievalJob implements Runnable {
 		while(stringDate.hasNext()) {
 			DailyStockData dsd = new DailyStockData();
 			dsd.setSymbol(symbol);
-			String test = stringDate.next();
-			JsonNode node = dailyDataNode.get(test);
-			dsd.setCurrStockDate(LocalDate.parse(test));
+			String date = stringDate.next();
+			JsonNode node = dailyDataNode.get(date);
+			dsd.setCurrStockDate(LocalDate.parse(date));
 			dsd.setDayOpen(Double.parseDouble(node.get("1. open").asText()));
 			dsd.setDayHigh(Double.parseDouble(node.get("2. high").asText()));
 			dsd.setDayLow(Double.parseDouble(node.get("3. low").asText()));
