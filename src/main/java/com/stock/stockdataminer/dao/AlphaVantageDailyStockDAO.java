@@ -17,7 +17,6 @@ public class AlphaVantageDailyStockDAO{
 	public AlphaVantageDailyStockDAO() {
 		try {
 			HikariConfig config = new HikariConfig();
-			log.info(System.getenv("jdbcUrl"));
 			config.setJdbcUrl(System.getenv("jdbcUrl"));
 			config.setUsername(System.getenv("dbUsername"));
 			config.setPassword(System.getenv("dbPassword"));
