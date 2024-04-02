@@ -9,7 +9,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stock.stockdataminer.model.DailyStockData;
+import com.stock.stockdataminer.model.CoreStockData;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,9 +25,9 @@ public class AlphaVantageCoreDataRetrievalJob implements Runnable {
 
 	private String stockInitialDownload;
 
-	private ConcurrentLinkedDeque<DailyStockData> dailyStockDataQueue;
+	private ConcurrentLinkedDeque<CoreStockData> dailyStockDataQueue;
 
-	public AlphaVantageCoreDataRetrievalJob(ConcurrentLinkedDeque<String> sq, ConcurrentLinkedDeque<DailyStockData> hdq,
+	public AlphaVantageCoreDataRetrievalJob(ConcurrentLinkedDeque<String> sq, ConcurrentLinkedDeque<CoreStockData> hdq,
 			String sep, String swk, String ak, String sid) {
 		this.symbolsQueue = sq;
 		this.dailyStockDataQueue = hdq;
@@ -48,52 +48,69 @@ public class AlphaVantageCoreDataRetrievalJob implements Runnable {
 
 	private void getHistoricalData(String symbol) {
 		log.info("getHistoricalData currently retrieving {}", symbol);
-		getDailyData(symbol);
+		//getDailyData(symbol);
+		getWeeklyData(symbol);
 		log.info("getHistoricalData end retrieving {}");
 	}
 
 	private void getDailyData(String symbol) {
+		String timeSeries = "Time Series (Daily)";
+		getData(symbol, timeSeries, this.stockDailyEndPoint);
+	}
+
+	private void getWeeklyData(String symbol) {
+		String timeSeries = "Weekly Time Series";
+		getData(symbol, timeSeries, this.stockWeeklyEndPoint);
+	}
+
+	private void getData(String symbol, String timeSeries, String endPoint) {
+		log.info("getData start {}", timeSeries);
 		LocalDate refrechedDate = null;
-		String jsonString = getJsonString(this.stockDailyEndPoint, symbol);
+		
+		String jsonString = getJsonString(endPoint, symbol);
+		
 		JsonNode financialDataNode = getJsonNode(jsonString);
 		JsonNode metaDataNode = financialDataNode.get("Meta Data");
 		if (this.stockInitialDownload.equalsIgnoreCase("false")) {
 			refrechedDate = LocalDate.parse(metaDataNode.get("3. Last Refreshed").asText());
 		}
 		String compSymbol = metaDataNode.get("2. Symbol").asText();
-		JsonNode dailyDataNode = financialDataNode.get("Time Series (Daily)");
+		JsonNode dailyDataNode = financialDataNode.get(timeSeries);
 		Iterator<String> stringDate = dailyDataNode.fieldNames();
 		while (stringDate.hasNext()) {
 			String date = stringDate.next();
 			JsonNode node = dailyDataNode.get(date);
 			if (refrechedDate == null) {
-				this.dailyStockDataQueue.add(getDailyStockData(node, compSymbol, date));
-			}else {
+				this.dailyStockDataQueue.add(getCoreStockData(node, compSymbol, date, timeSeries));
+			} else {
 				LocalDate currStockDate = LocalDate.parse(date);
-				if(currStockDate.getYear() == refrechedDate.getYear() && currStockDate.getMonthValue() == refrechedDate.getMonthValue()) {
-					this.dailyStockDataQueue.add(getDailyStockData(node, compSymbol, date));
+				if (currStockDate.getYear() == refrechedDate.getYear()
+						&& currStockDate.getMonthValue() == refrechedDate.getMonthValue()) {
+					this.dailyStockDataQueue.add(getCoreStockData(node, compSymbol, date, timeSeries));
 				}
 			}
 		}
+		log.info("getData End {}");
 	}
 
-	private DailyStockData getDailyStockData(JsonNode node, String compSymbol, String date) {
-		DailyStockData dsd = new DailyStockData();
-		dsd.setSymbol(compSymbol);
-		dsd.setCurrStockDate(LocalDate.parse(date));
-		dsd.setDayOpen(Double.parseDouble(node.get("1. open").asText()));
-		dsd.setDayHigh(Double.parseDouble(node.get("2. high").asText()));
-		dsd.setDayLow(Double.parseDouble(node.get("3. low").asText()));
-		dsd.setDayClose(Double.parseDouble(node.get("4. close").asText()));
-		dsd.setDayVolume(Double.parseDouble(node.get("5. volume").asText()));
+	private CoreStockData getCoreStockData(JsonNode node, String compSymbol, String date, String timeSeries) {
+		CoreStockData csd = new CoreStockData();
+		csd.setTimeSeries(timeSeries);
+		csd.setStockSymbol(compSymbol);
+		csd.setCurrStockDate(LocalDate.parse(date));
+		csd.setStockOpen(Double.parseDouble(node.get("1. open").asText()));
+		csd.setStockHigh(Double.parseDouble(node.get("2. high").asText()));
+		csd.setStockLow(Double.parseDouble(node.get("3. low").asText()));
+		csd.setStockClose(Double.parseDouble(node.get("4. close").asText()));
+		csd.setStockVolume(Double.parseDouble(node.get("5. volume").asText()));
 
-		return dsd;
+		return csd;
 	}
 
 	private String getJsonString(String endPoint, String symbol) {
 		String jsonString = "";
 		try {
-			String urlString = String.format(stockDailyEndPoint, symbol, this.apiKey);
+			String urlString = String.format(endPoint, symbol, this.apiKey);
 			log.info("***************{}", urlString);
 			URL url = new URL(urlString);
 			byte[] bytes = new URL(urlString).openStream().readAllBytes();

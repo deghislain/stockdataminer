@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Value;
 
-import com.stock.stockdataminer.model.DailyStockData;
+import com.stock.stockdataminer.model.CoreStockData;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,14 +31,14 @@ public class AlphaVantageCoreDataProcessorImpl implements AlphaVantageCoreDataPr
 
 	private ConcurrentLinkedDeque<String> symbolsQueue;
 
-	private ConcurrentLinkedDeque<DailyStockData> dsd;
+	private ConcurrentLinkedDeque<CoreStockData> dsd;
 	
 	private ScheduledExecutorService scheduler;
 	
 
 	public AlphaVantageCoreDataProcessorImpl() {
 		this.symbolsQueue = new ConcurrentLinkedDeque<String>();
-		this.dsd = new ConcurrentLinkedDeque<DailyStockData>();
+		this.dsd = new ConcurrentLinkedDeque<CoreStockData>();
 		this.scheduler = Executors.newScheduledThreadPool(2);
 	}
 

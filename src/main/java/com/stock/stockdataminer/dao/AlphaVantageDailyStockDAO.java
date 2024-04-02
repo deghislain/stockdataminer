@@ -4,16 +4,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import com.stock.stockdataminer.model.DailyStockData;
+import com.stock.stockdataminer.model.CoreStockData;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class AlphaVantageDailyStockDAO{
+public class AlphaVantageDailyStockDAO {
 	private HikariDataSource dataSource;
-	
+
 	public AlphaVantageDailyStockDAO() {
 		try {
 			HikariConfig config = new HikariConfig();
@@ -27,23 +27,29 @@ public class AlphaVantageDailyStockDAO{
 			log.error("Error: Unable to open the application properties file");
 		}
 	}
-	
-	public int saveDailyStock(DailyStockData dsd) {
+
+	public int saveCoreStock(CoreStockData dsd) {
+		String tableName = "";
+		if (dsd.getTimeSeries().contains("Weekly")) {
+			tableName = "av_weekly_stock_data";
+		} else {
+			tableName = "av_daily_stock_data";
+		}
 		log.info("saveDailyStock Start");
 		int result = 0;
 		try (Connection connection = dataSource.getConnection()) {
-			PreparedStatement statement = connection.prepareStatement(
-					"INSERT INTO av_daily_stock_data (symbol,curr_stock_date,day_open,day_high,day_low,day_close,day_volume)\r\n"
+			PreparedStatement statement = connection.prepareStatement("INSERT INTO " + tableName
+					+ " (stock_symbol,curr_stock_date,stock_open,stock_high,stock_low,stock_close,stock_volume)\r\n"
 					+ "							VALUES(?,?,?,?,?,?,?)");
-			
-			statement.setString(1, dsd.getSymbol());
+
+			statement.setString(1, dsd.getStockSymbol());
 			statement.setDate(2, java.sql.Date.valueOf(dsd.getCurrStockDate()));
-			statement.setDouble(3, dsd.getDayOpen());
-			statement.setDouble(4, dsd.getDayHigh());
-			statement.setDouble(5, dsd.getDayLow());
-			statement.setDouble(6, dsd.getDayClose());
-			statement.setDouble(7, dsd.getDayVolume());
-			
+			statement.setDouble(3, dsd.getStockOpen());
+			statement.setDouble(4, dsd.getStockHigh());
+			statement.setDouble(5, dsd.getStockLow());
+			statement.setDouble(6, dsd.getStockClose());
+			statement.setDouble(7, dsd.getStockVolume());
+
 			result = statement.executeUpdate();
 			log.info("saveDailyStock End");
 		} catch (SQLException e) {
@@ -54,7 +60,7 @@ public class AlphaVantageDailyStockDAO{
 			// Handle exceptions
 			log.error("Error: Unable to store daily stock data {}", e);
 		}
-		
+
 		return result;
 	}
 }
