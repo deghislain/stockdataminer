@@ -1,4 +1,4 @@
-package com.stock.stockdataminer.processor;
+package com.stock.stockdataminer.processor.core;
 
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -8,12 +8,12 @@ import com.stock.stockdataminer.model.DailyStockData;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class AlphaVantageDataPersistenceJob implements Runnable{
+public class AlphaVantageCoreDataPersistenceJob implements Runnable{
 	private ConcurrentLinkedDeque<DailyStockData> dailyStockDataQueue;
 	
 	private AlphaVantageDailyStockDAO dao;
 
-	public AlphaVantageDataPersistenceJob(ConcurrentLinkedDeque<DailyStockData> dsdq) {
+	public AlphaVantageCoreDataPersistenceJob(ConcurrentLinkedDeque<DailyStockData> dsdq) {
 		this.dailyStockDataQueue = dsdq;
 		this.dao = new AlphaVantageDailyStockDAO();
 	}

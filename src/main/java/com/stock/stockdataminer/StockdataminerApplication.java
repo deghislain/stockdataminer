@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 
-import com.stock.stockdataminer.processor.AlphaVantageDataProcessor;
+import com.stock.stockdataminer.processor.core.AlphaVantageCoreDataProcessor;
 
 @SpringBootApplication
 public class StockdataminerApplication {
@@ -18,7 +18,7 @@ public class StockdataminerApplication {
 	@Bean
 	public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
 		return args -> {
-			AlphaVantageDataProcessor alphaDatarocessor = ctx.getBean(AlphaVantageDataProcessor.class);
+			AlphaVantageCoreDataProcessor alphaDatarocessor = ctx.getBean(AlphaVantageCoreDataProcessor.class);
 			alphaDatarocessor.start();
 		};
 	}

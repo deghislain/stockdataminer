@@ -1,4 +1,4 @@
-package com.stock.stockdataminer.processor;
+package com.stock.stockdataminer.processor.core;
 
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.Executors;
@@ -12,15 +12,22 @@ import com.stock.stockdataminer.model.DailyStockData;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class AlphaVantageDataProcessorImpl implements AlphaVantageDataProcessor {
+public class AlphaVantageCoreDataProcessorImpl implements AlphaVantageCoreDataProcessor {
 	@Value("${stock.symbols}")
 	private String stockSymbols;
 	
-	@Value("${stock.endpoint}")
-	private String stockEndPoint;
+	@Value("${stock.daily.endpoint}")
+	private String stockDailyEndPoint;
+	
+	@Value("${stock.weekly.endpoint}")
+	private String stockWeeklyEndPoint;
 	
 	@Value("${stock.api.key}")
 	private String apiKey;
+	
+	@Value("${stock.initial.download}")
+	private String stockInitialDownload;
+	
 
 	private ConcurrentLinkedDeque<String> symbolsQueue;
 
@@ -29,7 +36,7 @@ public class AlphaVantageDataProcessorImpl implements AlphaVantageDataProcessor 
 	private ScheduledExecutorService scheduler;
 	
 
-	public AlphaVantageDataProcessorImpl() {
+	public AlphaVantageCoreDataProcessorImpl() {
 		this.symbolsQueue = new ConcurrentLinkedDeque<String>();
 		this.dsd = new ConcurrentLinkedDeque<DailyStockData>();
 		this.scheduler = Executors.newScheduledThreadPool(2);
@@ -40,9 +47,9 @@ public class AlphaVantageDataProcessorImpl implements AlphaVantageDataProcessor 
 		log.info("Stock Processing Start");
 		this.symbolsQueue = getStockSymblos();
 		// Schedule the job to run every Month
-		this.scheduler.scheduleAtFixedRate(new AlphaVantageDataRetrievalJob(this.symbolsQueue, this.dsd, this.stockEndPoint, this.apiKey), 0,
+		this.scheduler.scheduleAtFixedRate(new AlphaVantageCoreDataRetrievalJob(this.symbolsQueue, this.dsd, this.stockDailyEndPoint, this.stockWeeklyEndPoint, this.apiKey, this.stockInitialDownload), 0,
 				30, TimeUnit.DAYS);
-		this.scheduler.scheduleAtFixedRate(new AlphaVantageDataPersistenceJob(this.dsd), 0,
+		this.scheduler.scheduleAtFixedRate(new AlphaVantageCoreDataPersistenceJob(this.dsd), 0,
 				30, TimeUnit.DAYS);
 	}
 
