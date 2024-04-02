@@ -48,7 +48,7 @@ public class AlphaVantageCoreDataRetrievalJob implements Runnable {
 
 	private void getHistoricalData(String symbol) {
 		log.info("getHistoricalData currently retrieving {}", symbol);
-		//getDailyData(symbol);
+		getDailyData(symbol);
 		getWeeklyData(symbol);
 		log.info("getHistoricalData end retrieving {}");
 	}
