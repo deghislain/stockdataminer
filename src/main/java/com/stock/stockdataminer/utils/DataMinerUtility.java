@@ -9,13 +9,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DataMinerUtility {
 	public static String getJsonTestFile(String file) {
-		Object jsonQuiz = null;
+		Object jsonStock = null;
 		try {
-			jsonQuiz = new JSONParser().parse(new FileReader(file));
+			jsonStock = new JSONParser().parse(new FileReader(file));
+			log.info("jsonQuiz {}", jsonStock);
 
 		} catch (Exception e) {
 			log.error("Unable to load the daily.json file {}", e);
 		}
-		return jsonQuiz.toString();
+		return jsonStock.toString();
 	}
 }
