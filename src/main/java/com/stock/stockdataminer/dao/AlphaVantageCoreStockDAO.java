@@ -11,10 +11,10 @@ import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class AlphaVantageDailyStockDAO {
+public class AlphaVantageCoreStockDAO {
 	private HikariDataSource dataSource;
 
-	public AlphaVantageDailyStockDAO() {
+	public AlphaVantageCoreStockDAO() {
 		try {
 			HikariConfig config = new HikariConfig();
 			config.setJdbcUrl(System.getenv("jdbcUrl"));
@@ -29,13 +29,13 @@ public class AlphaVantageDailyStockDAO {
 	}
 
 	public int saveCoreStock(CoreStockData dsd) {
+		log.info("saveCoreStock Start");
 		String tableName = "";
 		if (dsd.getTimeSeries().contains("Weekly")) {
 			tableName = "av_weekly_stock_data";
 		} else {
 			tableName = "av_daily_stock_data";
 		}
-		log.info("saveDailyStock Start");
 		int result = 0;
 		try (Connection connection = dataSource.getConnection()) {
 			PreparedStatement statement = connection.prepareStatement("INSERT INTO " + tableName
@@ -60,7 +60,7 @@ public class AlphaVantageDailyStockDAO {
 			// Handle exceptions
 			log.error("Error: Unable to store daily stock data {}", e);
 		}
-
+		log.info("saveCoreStock End");
 		return result;
 	}
 }

@@ -40,8 +40,13 @@ public class AlphaVantageCoreDataRetrievalJob implements Runnable {
 	@Override
 	public void run() {
 		log.info("Alpha Vantage Data Retrieval Job started");
+		
+		while (this.symbolsQueue.size() > 0) {
+			log.info("symbolsQueue {}", symbolsQueue.size());
+			getHistoricalData(symbolsQueue.pollFirst());
+		}
 
-		getHistoricalData(symbolsQueue.pollFirst());
+	
 
 		log.info("Alpha vantage Data Retrieval Job Ended");
 	}
@@ -115,7 +120,7 @@ public class AlphaVantageCoreDataRetrievalJob implements Runnable {
 			URL url = new URL(urlString);
 			byte[] bytes = new URL(urlString).openStream().readAllBytes();
 			jsonString = new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
-			// String jsonString = DataMinerUtility.getJsonTestFile();//only for local
+			// String jsonString = DataMinerUtility.getJsonTestFile(daily.json);//only for local
 			// testing
 
 			log.info("getHistoricalData  {}", jsonString);
