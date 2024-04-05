@@ -1,5 +1,7 @@
-package com.stock.stockdataminer.processor.core;
+package com.stock.stockdataminer.processor;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -8,11 +10,12 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.stock.stockdataminer.model.CoreStockData;
+import com.stock.stockdataminer.model.FundStockData;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class AlphaVantageCoreDataProcessorImpl implements AlphaVantageCoreDataProcessor {
+public class AlphaVantageDataProcessorImpl implements AlphaVantageDataProcessor {
 	@Value("${stock.symbols}")
 	private String stockSymbols;
 	
@@ -28,28 +31,41 @@ public class AlphaVantageCoreDataProcessorImpl implements AlphaVantageCoreDataPr
 	@Value("${stock.initial.download}")
 	private String stockInitialDownload;
 	
+	@Value("${stock.income.endpoint}")
+	private String stockIncomeEndpoint;
+	
+	
+	
+	private Map<String, String>endPointsMap;
+	
 
 	private ConcurrentLinkedDeque<String> symbolsQueue;
 
-	private ConcurrentLinkedDeque<CoreStockData> dsd;
+	private ConcurrentLinkedDeque<CoreStockData> coreQueue;
+	
+	private ConcurrentLinkedDeque<FundStockData> fundQueue;
 	
 	private ScheduledExecutorService scheduler;
 	
 
-	public AlphaVantageCoreDataProcessorImpl() {
+	public AlphaVantageDataProcessorImpl() {
 		this.symbolsQueue = new ConcurrentLinkedDeque<String>();
-		this.dsd = new ConcurrentLinkedDeque<CoreStockData>();
+		this.coreQueue = new ConcurrentLinkedDeque<CoreStockData>();
+		this.fundQueue = new ConcurrentLinkedDeque<FundStockData>();
 		this.scheduler = Executors.newScheduledThreadPool(2);
+		this.endPointsMap = new HashMap<String, String>();
 	}
 
 	@Override
 	public void start() {
 		log.info("Stock Processing Start");
 		this.symbolsQueue = getStockSymblos();
+		this.endPointsMap = getStockEndPoints();
 		// Schedule the job to run every Month
-		this.scheduler.scheduleAtFixedRate(new AlphaVantageCoreDataRetrievalJob(this.symbolsQueue, this.dsd, this.stockDailyEndPoint, this.stockWeeklyEndPoint, this.apiKey, this.stockInitialDownload), 0,
+		this.scheduler.scheduleAtFixedRate(new AlphaVantageDataRetrievalJob(this.symbolsQueue, this.coreQueue, this.fundQueue, this.endPointsMap, this.apiKey, this.stockInitialDownload), 0,
 				30, TimeUnit.DAYS);
-		this.scheduler.scheduleAtFixedRate(new AlphaVantageCoreDataPersistenceJob(this.dsd), 0,
+		
+		this.scheduler.scheduleAtFixedRate(new AlphaVantageDataPersistenceJob(this.coreQueue,this.fundQueue), 0,
 				30, TimeUnit.DAYS);
 	}
 
@@ -63,6 +79,14 @@ public class AlphaVantageCoreDataProcessorImpl implements AlphaVantageCoreDataPr
 			}
 		}
 		return this.symbolsQueue;
+	}
+	
+	private Map<String, String> getStockEndPoints() {
+		log.info("Stock endpoints {}", this.endPointsMap);
+		this.endPointsMap.put("stockDailyEndPoint", this.stockDailyEndPoint);
+		this.endPointsMap.put("stockWeeklyEndPoint", this.stockWeeklyEndPoint);
+		this.endPointsMap.put("stockIncomeEndpoint", this.stockIncomeEndpoint);
+		return this.endPointsMap;
 	}
 
 }

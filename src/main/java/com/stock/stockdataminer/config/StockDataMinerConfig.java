@@ -3,14 +3,14 @@ package com.stock.stockdataminer.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.stock.stockdataminer.processor.core.AlphaVantageCoreDataProcessor;
-import com.stock.stockdataminer.processor.core.AlphaVantageCoreDataProcessorImpl;
+import com.stock.stockdataminer.processor.AlphaVantageDataProcessor;
+import com.stock.stockdataminer.processor.AlphaVantageDataProcessorImpl;
 
 @Configuration
 public class StockDataMinerConfig {
 
 	@Bean
-    public AlphaVantageCoreDataProcessor alphaVantageDataProcessor() {
-        return new AlphaVantageCoreDataProcessorImpl();
+    public AlphaVantageDataProcessor alphaVantageDataProcessor() {
+        return new AlphaVantageDataProcessorImpl();
     }
 }

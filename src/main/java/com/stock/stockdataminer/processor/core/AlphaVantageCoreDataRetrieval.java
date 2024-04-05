@@ -1,56 +1,35 @@
 package com.stock.stockdataminer.processor.core;
 
-import java.net.URL;
 import java.time.LocalDate;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stock.stockdataminer.model.CoreStockData;
 import com.stock.stockdataminer.utils.DataMinerUtility;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class AlphaVantageCoreDataRetrievalJob implements Runnable {
-	private ConcurrentLinkedDeque<String> symbolsQueue;
-
-	private String stockDailyEndPoint;
-
-	private String stockWeeklyEndPoint;
-
+public class AlphaVantageCoreDataRetrieval {
 	private String apiKey;
 
 	private String stockInitialDownload;
 
-	private ConcurrentLinkedDeque<CoreStockData> dailyStockDataQueue;
-
-	public AlphaVantageCoreDataRetrievalJob(ConcurrentLinkedDeque<String> sq, ConcurrentLinkedDeque<CoreStockData> hdq,
-			String sep, String swk, String ak, String sid) {
-		this.symbolsQueue = sq;
-		this.dailyStockDataQueue = hdq;
-		this.stockDailyEndPoint = sep;
-		this.stockWeeklyEndPoint = swk;
+	private ConcurrentLinkedDeque<CoreStockData> coreStockDataQueue;
+	
+	private Map<String, String>endPointsMap;
+	
+	public AlphaVantageCoreDataRetrieval(ConcurrentLinkedDeque<CoreStockData> cdq,
+			Map<String, String>epmap, String ak, String sid) {
+		this.coreStockDataQueue = cdq;
+		this.endPointsMap = epmap;
 		this.apiKey = ak;
 		this.stockInitialDownload = sid;
 	}
-
-	@Override
-	public void run() {
-		log.info("Alpha Vantage Data Retrieval Job started");
-
-		while (this.symbolsQueue.size() > 0) {
-			log.info("symbolsQueue {}", symbolsQueue.size());
-			getHistoricalData(symbolsQueue.pollFirst());
-		}
-
-		log.info("Alpha vantage Data Retrieval Job Ended");
-	}
-
-	private void getHistoricalData(String symbol) {
+	
+	public void getCoreHistoricalData(String symbol) {
 		log.info("getHistoricalData currently retrieving {}", symbol);
 		getDailyData(symbol);
 		getWeeklyData(symbol);
@@ -59,21 +38,21 @@ public class AlphaVantageCoreDataRetrievalJob implements Runnable {
 
 	private void getDailyData(String symbol) {
 		String timeSeries = "Time Series (Daily)";
-		getData(symbol, timeSeries, this.stockDailyEndPoint);
+		getData(symbol, timeSeries, this.endPointsMap.get("stockDailyEndPoint"));
 	}
 
 	private void getWeeklyData(String symbol) {
 		String timeSeries = "Weekly Time Series";
-		getData(symbol, timeSeries, this.stockWeeklyEndPoint);
+		getData(symbol, timeSeries, this.endPointsMap.get("stockWeeklyEndPoint"));
 	}
 
 	private void getData(String symbol, String timeSeries, String endPoint) {
 		log.info("getData start {}", timeSeries);
 		LocalDate refrechedDate = null;
 
-		String jsonString = getJsonString(endPoint, symbol);
+		String jsonString = DataMinerUtility.getJsonString(endPoint, symbol, this.apiKey);
 
-		JsonNode financialDataNode = getJsonNode(jsonString);
+		JsonNode financialDataNode = DataMinerUtility.getJsonNode(jsonString);
 		if(!isvalidFinantialNode(financialDataNode, timeSeries)) {
 			return;
 		}
@@ -88,12 +67,12 @@ public class AlphaVantageCoreDataRetrievalJob implements Runnable {
 			String date = stringDate.next();
 			JsonNode node = dailyDataNode.get(date);
 			if (refrechedDate == null) {
-				this.dailyStockDataQueue.add(getCoreStockData(node, compSymbol, date, timeSeries));
+				this.coreStockDataQueue.add(getCoreStockData(node, compSymbol, date, timeSeries));
 			} else {
 				LocalDate currStockDate = LocalDate.parse(date);
 				if (currStockDate.getYear() == refrechedDate.getYear()
 						&& currStockDate.getMonthValue() == refrechedDate.getMonthValue()) {
-					this.dailyStockDataQueue.add(getCoreStockData(node, compSymbol, date, timeSeries));
+					this.coreStockDataQueue.add(getCoreStockData(node, compSymbol, date, timeSeries));
 				}
 			}
 		}
@@ -158,36 +137,6 @@ public class AlphaVantageCoreDataRetrievalJob implements Runnable {
 		}
 
 		return csd;
-	}
-
-	private String getJsonString(String endPoint, String symbol) {
-		String jsonString = "";
-		try {
-			String urlString = String.format(endPoint, symbol, this.apiKey);
-			log.info("***************{}", urlString);
-			URL url = new URL(urlString);
-			byte[] bytes = new URL(urlString).openStream().readAllBytes();
-			jsonString = new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
-			//jsonString = DataMinerUtility.getJsonTestFile("daily.json");//only for local testing
-
-			log.info("----getHistoricalData  {}", jsonString);
-		} catch (Exception e) {
-			log.info("Error while retrieving stock data {}", e);
-		}
-		return jsonString;
-	}
-
-	private JsonNode getJsonNode(String jsonString) {
-		ObjectMapper obj = new ObjectMapper();
-		JsonNode jsonNode = null;
-		try {
-			jsonNode = obj.readTree(jsonString);
-		} catch (JsonMappingException e) {
-			log.error("Error while mapping alpha vantage json file {}", e);
-		} catch (JsonProcessingException e) {
-			log.error("Error while Processing alpha vantage json file {}", e);
-		}
-		return jsonNode;
 	}
 
 }
