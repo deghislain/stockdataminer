@@ -26,10 +26,10 @@ public class AlphaVantageDataPersistenceJob implements Runnable{
 		log.info("Persisisting Job Started"); 
 		try {
 			Thread.sleep(15000);
-			while (this.coreStockDataQueue.size() > 0) {
+			while (this.coreStockDataQueue.size() > 0 || this.fundStockDataQueue.size() > 0) {
 				log.info("dailyStockDataQueue {}", coreStockDataQueue.size());
 				saveAlphaVantageCoreStock(this.coreStockDataQueue.pollFirst());
-				saveAlphaVantageFundStock(this.fundStockDataQueue.peekFirst());
+				saveAlphaVantageFundStock(this.fundStockDataQueue.pollFirst());
 			}
 			log.info("Persisisting Job Ended");
 		} catch (InterruptedException e) {
