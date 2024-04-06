@@ -60,30 +60,35 @@ public class AlphaVantageIncomeStatDataRetrieval {
 			}
 			
 			if(nextNode.has("totalRevenue") && nextNode.get("totalRevenue") != null && !nextNode.get("totalRevenue").asText().isBlank()) {
-				siData.setTotalRevenue(Double.parseDouble(nextNode.get("totalRevenue").asText()));
+				String totalRevenue = nextNode.get("totalRevenue").asText();
+				siData.setTotalRevenue(Double.parseDouble(totalRevenue.equalsIgnoreCase("none")? "0" : totalRevenue ));
 			}else {
 				log.debug("The field totalRevenue is missing");
 			}
 			if(nextNode.has("grossProfit") && nextNode.get("grossProfit") != null && !nextNode.get("grossProfit").asText().isBlank()) {
-				siData.setGrossProfit(Double.parseDouble(nextNode.get("grossProfit").asText()));
+				String grossProfit = nextNode.get("grossProfit").asText();
+				siData.setGrossProfit(Double.parseDouble(grossProfit.equalsIgnoreCase("none") ? "0" : grossProfit));
 			}else {
 				log.debug("The field grossProfit is missing");
 			}
 			
 			if(nextNode.has("netIncome") && nextNode.get("netIncome") != null && !nextNode.get("netIncome").asText().isBlank()) {
-				siData.setNetIncome(Double.parseDouble(nextNode.get("netIncome").asText()));
+				String netIncome = nextNode.get("netIncome").asText();
+				siData.setNetIncome(Double.parseDouble(netIncome.equalsIgnoreCase("none") ? "0" : netIncome));
 			}else {
 				log.debug("The field netIncome is missing");
 			}
 			
 			if(nextNode.has("operatingIncome") && nextNode.get("operatingIncome") != null && !nextNode.get("operatingIncome").asText().isBlank()) {
-				siData.setOperatingIncome(Double.parseDouble(nextNode.get("operatingIncome").asText()));
+				String operatingIncome = nextNode.get("operatingIncome").asText();
+				siData.setOperatingIncome(Double.parseDouble(operatingIncome.equalsIgnoreCase("none") ? "0" : operatingIncome));
 			}else {
 				log.debug("The field operatingIncome is missing");
 			}
 			
 			if(nextNode.has("researchAndDevelopment") && nextNode.get("researchAndDevelopment") != null && !nextNode.get("researchAndDevelopment").asText().isBlank()) {
-				siData.setReschAndDev(Double.parseDouble(nextNode.get("researchAndDevelopment").asText()));
+				String researchAndDevelopment = nextNode.get("researchAndDevelopment").asText();
+				siData.setReschAndDev(Double.parseDouble(researchAndDevelopment.equalsIgnoreCase("none") ? "0" : researchAndDevelopment));
 			}else {
 				log.debug("The field researchAndDevelopment is missing");
 			}

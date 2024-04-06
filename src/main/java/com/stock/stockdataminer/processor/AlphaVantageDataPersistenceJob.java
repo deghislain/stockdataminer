@@ -3,8 +3,10 @@ package com.stock.stockdataminer.processor;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import com.stock.stockdataminer.dao.AlphaVantageCoreStockDAO;
+import com.stock.stockdataminer.dao.AlphaVantageFundStockDAO;
 import com.stock.stockdataminer.model.CoreStockData;
 import com.stock.stockdataminer.model.FundStockData;
+import com.stock.stockdataminer.model.StockIncomeStatData;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,12 +15,14 @@ public class AlphaVantageDataPersistenceJob implements Runnable{
 	private ConcurrentLinkedDeque<CoreStockData> coreStockDataQueue;
 	private ConcurrentLinkedDeque<FundStockData> fundStockDataQueue;
 	
-	private AlphaVantageCoreStockDAO dao;
+	private AlphaVantageCoreStockDAO coreStockDao;
+	private AlphaVantageFundStockDAO fundStockDao;
 
 	public AlphaVantageDataPersistenceJob(ConcurrentLinkedDeque<CoreStockData> cq, ConcurrentLinkedDeque<FundStockData> fq) {
 		this.coreStockDataQueue = cq;
 		this.fundStockDataQueue = fq;
-		this.dao = new AlphaVantageCoreStockDAO();
+		this.coreStockDao = new AlphaVantageCoreStockDAO();
+		this.fundStockDao = new AlphaVantageFundStockDAO();
 	}
 
 	@Override
@@ -28,6 +32,7 @@ public class AlphaVantageDataPersistenceJob implements Runnable{
 			Thread.sleep(15000);
 			while (this.coreStockDataQueue.size() > 0 || this.fundStockDataQueue.size() > 0) {
 				log.info("dailyStockDataQueue {}", coreStockDataQueue.size());
+				log.info("dailyStockDataQueue {}", fundStockDataQueue.size());
 				saveAlphaVantageCoreStock(this.coreStockDataQueue.pollFirst());
 				saveAlphaVantageFundStock(this.fundStockDataQueue.pollFirst());
 			}
@@ -39,17 +44,21 @@ public class AlphaVantageDataPersistenceJob implements Runnable{
 	
 	private void saveAlphaVantageCoreStock(CoreStockData csd) {
 		log.info(" saveAlphaVantageCoreStock Start {}", csd);
-	
-		dao.saveCoreStock(csd);
-		
+		if (csd != null) {
+			this.coreStockDao.saveCoreStock(csd);
+		}else {
+			log.info("coreStockDataQueue is empty");
+		}
 		log.info(" saveAlphaVantageCoreStock End {}");
 	}
 	
 	private void saveAlphaVantageFundStock(FundStockData fsd) {
 		log.info(" saveAlphaVantageFundStock Start {}", fsd);
-	
-		
-		
+		StockIncomeStatData statData = null;
+		if(fsd != null && fsd instanceof StockIncomeStatData) {
+			statData = (StockIncomeStatData)fsd;
+			 this.fundStockDao.saveIncomeStockData(statData);
+		}
 		log.info(" saveAlphaVantageFundStock End {}");
 	}
 
