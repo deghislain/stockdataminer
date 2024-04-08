@@ -34,6 +34,8 @@ public class AlphaVantageDataProcessorImpl implements AlphaVantageDataProcessor 
 	@Value("${stock.income.endpoint}")
 	private String stockIncomeEndpoint;
 	
+	@Value("${stock.balance.endpoint}")
+	private String balanceSheetEndpoint;
 	
 	
 	private Map<String, String>endPointsMap;
@@ -52,7 +54,7 @@ public class AlphaVantageDataProcessorImpl implements AlphaVantageDataProcessor 
 		this.symbolsQueue = new ConcurrentLinkedDeque<String>();
 		this.coreQueue = new ConcurrentLinkedDeque<CoreStockData>();
 		this.fundQueue = new ConcurrentLinkedDeque<FundStockData>();
-		this.scheduler = Executors.newScheduledThreadPool(2);
+		this.scheduler = Executors.newScheduledThreadPool(3);
 		this.endPointsMap = new HashMap<String, String>();
 	}
 
@@ -86,6 +88,7 @@ public class AlphaVantageDataProcessorImpl implements AlphaVantageDataProcessor 
 		this.endPointsMap.put("stockDailyEndPoint", this.stockDailyEndPoint);
 		this.endPointsMap.put("stockWeeklyEndPoint", this.stockWeeklyEndPoint);
 		this.endPointsMap.put("stockIncomeEndpoint", this.stockIncomeEndpoint);
+		this.endPointsMap.put("balanceSheetEndpoint", this.balanceSheetEndpoint);
 		return this.endPointsMap;
 	}
 

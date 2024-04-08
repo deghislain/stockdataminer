@@ -6,6 +6,7 @@ import com.stock.stockdataminer.dao.AlphaVantageCoreStockDAO;
 import com.stock.stockdataminer.dao.AlphaVantageFundStockDAO;
 import com.stock.stockdataminer.model.CoreStockData;
 import com.stock.stockdataminer.model.FundStockData;
+import com.stock.stockdataminer.model.StockBalanceSheetData;
 import com.stock.stockdataminer.model.StockIncomeStatData;
 
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,7 @@ public class AlphaVantageDataPersistenceJob implements Runnable{
 			Thread.sleep(15000);
 			while (this.coreStockDataQueue.size() > 0 || this.fundStockDataQueue.size() > 0) {
 				log.info("dailyStockDataQueue {}", coreStockDataQueue.size());
-				log.info("dailyStockDataQueue {}", fundStockDataQueue.size());
+				log.info("fundStockDataQueue {}", fundStockDataQueue.size());
 				saveAlphaVantageCoreStock(this.coreStockDataQueue.pollFirst());
 				saveAlphaVantageFundStock(this.fundStockDataQueue.pollFirst());
 			}
@@ -58,6 +59,11 @@ public class AlphaVantageDataPersistenceJob implements Runnable{
 		if(fsd != null && fsd instanceof StockIncomeStatData) {
 			statData = (StockIncomeStatData)fsd;
 			 this.fundStockDao.saveIncomeStockData(statData);
+		}
+		StockBalanceSheetData balanceData = null;
+		if(fsd != null && fsd instanceof StockBalanceSheetData) {
+			balanceData = (StockBalanceSheetData)fsd;
+			 this.fundStockDao.saveBalanceSheetStockData(balanceData);
 		}
 		log.info(" saveAlphaVantageFundStock End {}");
 	}

@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import com.stock.stockdataminer.model.CoreStockData;
 import com.stock.stockdataminer.model.FundStockData;
 import com.stock.stockdataminer.processor.core.AlphaVantageCoreDataRetrieval;
+import com.stock.stockdataminer.processor.fund.AlphaVantageBalanceShhetDataRetrieval;
 import com.stock.stockdataminer.processor.fund.AlphaVantageFundDataRetrieval;
 
 import lombok.extern.slf4j.Slf4j;
@@ -18,11 +19,14 @@ public class AlphaVantageDataRetrievalJob implements Runnable {
 	
 	private AlphaVantageFundDataRetrieval fundDataRetrieval;
 	
+	private AlphaVantageBalanceShhetDataRetrieval balanceDataRetrieval;
+	
 	public AlphaVantageDataRetrievalJob(ConcurrentLinkedDeque<String> sq, ConcurrentLinkedDeque<CoreStockData> cdq,ConcurrentLinkedDeque<FundStockData> fdq,
 			Map<String, String>epmap, String ak, String sid) {
 		this.symbolsQueue = sq;
 		this.coreDataRetrieval = new AlphaVantageCoreDataRetrieval(cdq, epmap, ak, sid);
 		this.fundDataRetrieval = new AlphaVantageFundDataRetrieval(fdq, epmap, ak, sid);
+		this.balanceDataRetrieval = new AlphaVantageBalanceShhetDataRetrieval(fdq, epmap, ak, sid);
 	}
 
 	@Override
@@ -32,8 +36,9 @@ public class AlphaVantageDataRetrievalJob implements Runnable {
 		while (this.symbolsQueue.size() > 0) {
 			log.info("symbolsQueue {}", symbolsQueue.size());
 			String symbol = this.symbolsQueue.pollFirst();
-			this.coreDataRetrieval.getCoreHistoricalData(symbol);
-			this.fundDataRetrieval.getFundHistoricalData(symbol);
+			//this.coreDataRetrieval.getCoreHistoricalData(symbol);
+			//this.fundDataRetrieval.getFundHistoricalData(symbol);
+			this.balanceDataRetrieval.getStocBalanceSheetData(symbol);
 		}
 
 		log.info("Alpha vantage Data Retrieval Job Ended");
