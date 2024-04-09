@@ -8,13 +8,12 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.stock.stockdataminer.model.FundStockData;
 import com.stock.stockdataminer.model.StockBalanceSheetData;
-import com.stock.stockdataminer.model.StockIncomeStatData;
 import com.stock.stockdataminer.utils.DataMinerUtility;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class AlphaVantageBalanceShhetDataRetrieval {
+public class AlphaVantageBalanceSheetDataRetrieval {
 	private String apiKey;
 
 	private String stockInitialDownload;
@@ -23,7 +22,7 @@ public class AlphaVantageBalanceShhetDataRetrieval {
 	
 	private Map<String, String>endPointsMap;
 	
-	public AlphaVantageBalanceShhetDataRetrieval(ConcurrentLinkedDeque<FundStockData> fdq,
+	public AlphaVantageBalanceSheetDataRetrieval(ConcurrentLinkedDeque<FundStockData> fdq,
 			Map<String, String>epmap, String ak, String sid) {
 		this.fundStockDataQueue = fdq;
 		this.endPointsMap = epmap;
@@ -112,11 +111,10 @@ public class AlphaVantageBalanceShhetDataRetrieval {
 			}else {
 				log.debug("The field currentDebt is missing");
 			}
-			
+			this.fundStockDataQueue.add(balanceData);
 			if(this.stockInitialDownload.equals("false") && count == 1) {
 				break;
 			}
-			this.fundStockDataQueue.add(balanceData);
 		}
 		log.info("getStocBalanceSheetData");
 	}

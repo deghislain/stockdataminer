@@ -7,6 +7,7 @@ import com.stock.stockdataminer.dao.AlphaVantageFundStockDAO;
 import com.stock.stockdataminer.model.CoreStockData;
 import com.stock.stockdataminer.model.FundStockData;
 import com.stock.stockdataminer.model.StockBalanceSheetData;
+import com.stock.stockdataminer.model.StockCashFlowData;
 import com.stock.stockdataminer.model.StockIncomeStatData;
 
 import lombok.extern.slf4j.Slf4j;
@@ -64,6 +65,11 @@ public class AlphaVantageDataPersistenceJob implements Runnable{
 		if(fsd != null && fsd instanceof StockBalanceSheetData) {
 			balanceData = (StockBalanceSheetData)fsd;
 			 this.fundStockDao.saveBalanceSheetStockData(balanceData);
+		}
+		StockCashFlowData cashData = null;
+		if(fsd != null && fsd instanceof StockCashFlowData) {
+			cashData = (StockCashFlowData)fsd;
+			 this.fundStockDao.saveCashFlowStockData(cashData);
 		}
 		log.info(" saveAlphaVantageFundStock End {}");
 	}

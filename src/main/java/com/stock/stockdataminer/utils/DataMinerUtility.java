@@ -35,7 +35,7 @@ public class DataMinerUtility {
 			URL url = new URL(urlString);
 			byte[] bytes = new URL(urlString).openStream().readAllBytes();
 			jsonString = new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
-			//jsonString = DataMinerUtility.getJsonTestFile("balance.json");//only for local testing
+			//jsonString = DataMinerUtility.getJsonTestFile("cash.json");//only for local testing
 
 			log.info("----getJsonString  {}", jsonString);
 		} catch (Exception e) {
