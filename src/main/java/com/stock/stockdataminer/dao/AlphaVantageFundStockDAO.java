@@ -6,6 +6,7 @@ import java.sql.SQLException;
 
 import com.stock.stockdataminer.model.StockBalanceSheetData;
 import com.stock.stockdataminer.model.StockCashFlowData;
+import com.stock.stockdataminer.model.StockGenericInfo;
 import com.stock.stockdataminer.model.StockIncomeStatData;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -32,15 +33,19 @@ public class AlphaVantageFundStockDAO {
 	}
 	
 	public int saveIncomeStockData(StockIncomeStatData fsd) {
-		return saveIncomeStatement(fsd);
+		return this.saveIncomeStatement(fsd);
 	}
 	
 	public int saveBalanceSheetStockData(StockBalanceSheetData fsd) {
-		return saveBalanceSheet(fsd);
+		return this.saveBalanceSheet(fsd);
 	}
 	
 	public int saveCashFlowStockData(StockCashFlowData fsd) {
-		return saveCashFlowt(fsd);
+		return this.saveCashFlowt(fsd);
+	}
+	
+	public int saveGenericStockData(StockGenericInfo fsd) {
+		return this.saveStockGenericInfo(fsd);
 	}
 	
 	private int saveIncomeStatement(StockIncomeStatData fsd) {
@@ -137,4 +142,28 @@ public class AlphaVantageFundStockDAO {
 		return result;
 	}
 
+	private int saveStockGenericInfo(StockGenericInfo fsd) {
+		log.info("saveStockGenericInfo Start");
+		int result = 0;
+		try (Connection connection = dataSource.getConnection()) {
+			PreparedStatement statement = connection.prepareStatement("INSERT INTO stock_generic_info_data" 
+					+ " (stock_symbol,stock_fiscale_date,stock_reported_eps)\r\n"
+					+ "							VALUES(?,?,?)");
+
+			statement.setString(1, fsd.getStockSymbol());
+			statement.setDate(2, java.sql.Date.valueOf(fsd.getStockfiscaleDate()));
+			statement.setDouble(3, fsd.getReportedEPS());
+
+			result = statement.executeUpdate();
+		} catch (SQLException e) {
+			// Handle exceptions
+			System.err.format("******************SQL State: %s\n%s", e.getSQLState(), e.getMessage());
+			log.error("Error: Unable to store generick info data {}", e);
+		} catch (Exception e) {
+			// Handle exceptions
+			log.error("Error: Unable to store generic info stock data {}", e);
+		}
+		log.info("saveStockGenericInfo End");
+		return result;
+	}
 }

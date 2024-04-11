@@ -6,8 +6,6 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import com.stock.stockdataminer.model.CoreStockData;
 import com.stock.stockdataminer.model.FundStockData;
 import com.stock.stockdataminer.processor.core.AlphaVantageCoreDataRetrieval;
-import com.stock.stockdataminer.processor.fund.AlphaVantageBalanceSheetDataRetrieval;
-import com.stock.stockdataminer.processor.fund.AlphaVantageCashFlowDataRetrieval;
 import com.stock.stockdataminer.processor.fund.AlphaVantageFundDataRetrieval;
 
 import lombok.extern.slf4j.Slf4j;

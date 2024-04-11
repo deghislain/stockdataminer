@@ -40,6 +40,8 @@ public class AlphaVantageDataProcessorImpl implements AlphaVantageDataProcessor 
 	@Value("${stock.cash.endpoint}")
 	private String cashFlowEndpoint;
 	
+	@Value("${stock.earnings.endpoint}")
+	private String stockEarningsEndpoint;
 	
 	
 	private Map<String, String>endPointsMap;
@@ -94,6 +96,7 @@ public class AlphaVantageDataProcessorImpl implements AlphaVantageDataProcessor 
 		this.endPointsMap.put("stockIncomeEndpoint", this.stockIncomeEndpoint);
 		this.endPointsMap.put("balanceSheetEndpoint", this.balanceSheetEndpoint);
 		this.endPointsMap.put("cashFlowEndpoint", this.cashFlowEndpoint);
+		this.endPointsMap.put("stockEarningsEndpoint", this.stockEarningsEndpoint);
 		return this.endPointsMap;
 	}
 
